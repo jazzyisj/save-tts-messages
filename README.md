@@ -61,9 +61,13 @@ The default configuration will play *"There are no messages waiting for you."* i
 You can also change the default so the message is not played unless `skip_none` is set to `false`.
 
 Change
+
     skip_none: '{{ skip_none|default(true) }}'
+
 to
+
     skip_none: '{{ skip_none|default(false) }}'
+
 
 Then call with `skip_none` set to `false` if you want the no saved messages messaage to play.
 
