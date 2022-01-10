@@ -40,7 +40,7 @@ script:
   ###############################################################################
   # Play/Save TTS Message
   ###############################################################################
-  play_save_message:
+  play_or_save_message:
     alias: 'Play or Save Messsage'
     description: 'Play TTS message if someone is home or save it if not.'
     mode: queued
@@ -130,7 +130,7 @@ script:
         description: 'Skip no saved messages announcement.'
         example: 'true'
     variables:
-      skip_none: '{{ skip_none|default(true) }}'
+      skip_none: '{{ skip_none|default(false) }}'
       msgs: "{{ states('variable.saved_messages')|int(0) }}"
     sequence:
       - condition: template
@@ -192,7 +192,7 @@ script:
   # Clear Saved TTS Messages
   ###############################################################################
   clear_saved_messages:
-    alias: 'Play Saved Messages'
+    alias: 'Clear Saved Messages'
     description: 'Clear saved TTS messages.'
     sequence:
       - service: variable.set_variable

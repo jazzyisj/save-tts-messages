@@ -1,7 +1,7 @@
 # Play and Save TTS Messages
 
 ## What is this?
-This is more or less an answering machine (remember those?) for your TTS messages.  When you play a TTS message that you want saved under certain condtions (ie. nobody is home), you will call the **Play or Save TTS Messsage** script `script.play_save_tts` instead of calling your tts service directly.  The script will decide whether to play the message immediately, or save it based on the conditions you specify.
+This is more or less an answering machine (remember those?) for your TTS messages.  When you play a TTS message that you want saved under certain condtions (ie. nobody is home), you will call the **Play or Save TTS Messsage** script `script.play_or_save_message` instead of calling your tts service directly.  The script will decide whether to play the message immediately, or save it based on the conditions you specify.
 
 Messages are played back using the **Play Saved TTS Messages** script `script.play_saved_tts_messages`.  Set an appropriate trigger (for example when you arrive home) in the **Play Saved Messages** `automation.play_saved_messages` automation to call this script automatically.
 
@@ -46,14 +46,14 @@ Finally, you must create the **Play or Save TTS Messsage** service calls.  Repla
 
 becomes
 
-    - service: script.play_save_tts
+    - service: script.play_or_save_message
       data:
         message: "This is my message!"
 
 ### Skip No Messages Notification
 The default configuration will play *"There are no messages waiting for you."* if there are no saved messages when  **Play Saved TTS Messages** is called.  If you wish to skip this message you can specify the `skip_none` parameter in a  **Play or Save TTS Messsage** service call.
 
-    - service: script.play_save_tts
+    - service: script.play_or_save_message
       data:
         message: "This is my message!"
         skip_none: true
@@ -71,7 +71,7 @@ to
 
 Then call with `skip_none` set to `false` if you want the no saved messages messaage to play.
 
-    - service: script.play_save_tts
+    - service: script.play_or_save_message
       data:
         message: "This is my message!"
         skip_none: false
