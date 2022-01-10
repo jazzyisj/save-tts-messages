@@ -10,7 +10,7 @@
     {%- if loop.index % 2 == 1 %}
     {%- set msgnum.value = msgnum.value + 1 %}
     - **{{ value }}**
-    <sup>{{ as_datetime(state_attr('variable.saved_messages','msg_time' ~ msgnum.value)).strftime('%A, %B %-d @ %-I:%M %p') }}</sup>
+    <sup>{{ as_datetime(state_attr('variable.saved_messages','msg_time' ~ msgnum.value)).strftime('%A, %B %-d at %-I:%M %p') }}</sup>
     {% endif %}
     {% endfor %}
     {% else %} No messages.

@@ -22,7 +22,7 @@ entities:
         name: Last Message
         tap_action:
           action: call-service
-          service: script.play_last_messages
+          service: script.play_last_message
 
       - entity: script.clear_saved_messages
         name: Delete Messages

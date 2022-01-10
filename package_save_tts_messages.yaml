@@ -25,7 +25,7 @@ sensor: #TODO delete this sensor if you don't want to use message history
 
 notify: #TODO delete this notify platorm if you don't want to use message history
   - platform: file
-    name: 'TTS History'
+    name: 'TTS Message History'
     filename: /config/www/tts_message_history.txt
     value_template: '{{ value_json }}'
 
@@ -63,9 +63,18 @@ script:
       message:
         description: 'Message to play or save.'
         example: 'This is my message!'
+      skip_save:
+        description: 'Skip saving the message.'
+        example: 'true'
+    variables:
+      skip_save: "{{ skip_save|default(false) }}"
     sequence:
       - choose:
           - conditions:
+              - condition: template #NOTE - do not remove this condition
+                alias: 'Message save not skipped.'
+                value_template: '{{ not skip_save }}'
+
               - condition: state #TODO example condition - adjust for your needs
                 entity_id: person.jason
                 state: home
@@ -81,7 +90,7 @@ script:
               message: '{{ message }}'
 
       #TODO delete this service call if you don't want to use message history
-      - service: notify.tts_history
+      - service: notify.tts_message_history
         data:
           message: "{{ (now() ~ ' ' ~ message)[0:250]|replace('\n',' ') }}"
 
@@ -235,13 +244,16 @@ script:
         target:
           entity_id: media_player.dining_room_hub #TODO change to your own media player entity
         data:
-          message: >
-            {% set message = states('sensor.tts_last_message')[33:255] %}
-            {% set time = as_datetime(states('sensor.tts_last_message')[0:32]).strftime('%-I:%M %p') %}
-            {% if now().day == time.day %} Today at {{ time.strftime('%-I:%M %p') }}
-            {% elif now().day - time.day == 1 %} Yesterday at {{ time.strftime('%-I:%M %p') }}
-            {% elif now().day - time.day > 6%} {{ time.strftime('%A, %B %-d at %-I:%M %p') }}
-            {% else %} {{ time.strftime('%A at %-I:%M %p') }}
+          message: |
+            {% set message = states('sensor.last_tts_message')[33:255] %}
+            {% if message == '' %} There are no messages in the history.
+            {% else %}
+              {% set time = as_datetime(states('sensor.last_tts_message')[0:32]) %}
+              {% if now().day == time.day %} {% set time_msg = 'Today at ' ~ time.strftime('%-I:%M %p') %}
+              {% elif now().day - time.day == 1 %} {% set time_msg = 'Yesterday at ' ~ time.strftime('%-I:%M %p') %}
+              {% elif now().day - time.day > 6%} {% set time_msg = time.strftime('%A, %B %-d at %-I:%M %p') %}
+              {% else %} {% set time_msg = time.strftime('%A at %-I:%M %p') %}
+              {% endif %}
+              {{ message }}
+              {{ time_msg }}.
             {% endif %}
-            {{ message }}, {{ time }}
-
