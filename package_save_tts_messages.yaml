@@ -125,7 +125,6 @@ script:
   play_saved_messages:
     alias: 'Play Saved Messages'
     description: 'Play saved TTS messages.'
-    max_exceeded: silent
     fields:
       skip_none:
         description: 'Skip no saved messages announcement.'
@@ -143,8 +142,8 @@ script:
           entity_id: media_player.dining_room_hub #TODO change to your media player entity
         data:
           message: >
-            There {{ 'are no messages' if msgs == 0 else 'is 1 message'
-              if msgs == 1 else 'are ' ~ msgs ~ ' messages' }} waiting for you.
+            There {{ 'are no messages' if msgs == 0 else ('is 1 message'
+              if msgs == 1 else 'are ' ~ msgs ~ ' messages') }} waiting for you.
 
       - wait_for_trigger:
           - platform: state
@@ -187,7 +186,15 @@ script:
 
                     - delay: 1 # delay between messages
 
-      # erase saved messages
+      - service: script.clear_saved_messages
+
+  ###############################################################################
+  # Clear Saved TTS Messages
+  ###############################################################################
+  clear_saved_messages:
+    alias: 'Play Saved Messages'
+    description: 'Clear saved TTS messages.'
+    sequence:
       - service: variable.set_variable
         data:
           variable: saved_messages

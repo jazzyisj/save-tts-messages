@@ -1,9 +1,9 @@
 # Play and Save TTS Messages
 
 ## What is this?
-This is more or less an answering machine (remember those?) for your TTS messages.  When you play a TTS message that you want saved under certain condtions (ie. nobody is home), you will call the **Play or Save TTS Messsage** script (`script.play_save_tts`) instead of calling your tts service directly.  The script will decide whether to play the message immediately, or save it based on the conditions you specify.
+This is more or less an answering machine (remember those?) for your TTS messages.  When you play a TTS message that you want saved under certain condtions (ie. nobody is home), you will call the **Play or Save TTS Messsage** script `script.play_save_tts` instead of calling your tts service directly.  The script will decide whether to play the message immediately, or save it based on the conditions you specify.
 
-Messages are played back using the **Play Saved TTS Messages** script (script.play_saved_tts_messages).  Set an appropriate trigger (for example when you arrive home) in the **Play Saved Messages** (`automation.play_saved_messages`) automation to call this script automatically.
+Messages are played back using the **Play Saved TTS Messages** script `script.play_saved_tts_messages`.  Set an appropriate trigger (for example when you arrive home) in the **Play Saved Messages** `automation.play_saved_messages` automation to call this script automatically.
 
 Saved messages will survive restarts.
 
@@ -16,21 +16,21 @@ To enable packages in your configuation, create a folder in your config director
     homeassistant:
       packages: /config/packages
 
-If you already have packages enabled in your configuration, simply download [package_save_tts_messages.yaml]() to your packages directory.  Don't forget to restart Home Assistant!
+If you already have packages enabled in your configuration, simply download [package_save_tts_messages.yaml](package_save_tts_messages.yaml) to your packages directory.  Don't forget to restart Home Assistant!
 
 ### Install Without Pacakges
-To utilize this without installing as a package copy the relevant code and paste in an appropriate place in your configuration.yaml file.  Everything but the automation is required for Play and Save TTS Messages to function.
+To utilize this without installing as a package copy the relevant code and paste in an appropriate place in your `configuration.yaml` file.  Everything but the automation is required for Play and Save TTS Messages to function.
 
 ### Install HASS-Variables Custom Integration
 The [HASS-Variables](https://github.com/Wibias/hass-variables) integration is available on HACS. If you're not using HACS I'll assume you know how to install it manually.
 
 ### Adjust Package For Your Configuration
-You must change a couple of things in the package to work with your configuration.  Look for the #TODO tags!
+You must change a couple of things in the package to work with your configuration.  **Look for the #TODO tags!**
 
-- **TTS Servce** - The package default is tts.cloud_say which is the NabuCasa TTS service.  Change this to whichever TTS service you use.
+- **TTS Servce** - The package default is `tts.cloud_say` which is the NabuCasa TTS service.  Change this to whichever TTS service you use.
 - **Media Player** - You must change these media player entity_ids to a valid media player entity id in your configuration.
 - **Play or Save Condition** - Adjust this condition to decide whether to play or save the TTS message.  The TTS message will play immediately and will not be saved when the condition(s) evaluate to true.
-- **'Play Saved Messages Trigger** - Adjust this trigger to automatically call **Play Saved TTS Messages**.  You can, of course, call the script directly anytime from a button etc.
+- **Play Saved Messages Trigger** - Adjust this trigger to automatically call **Play Saved TTS Messages**.  You can, of course, call the script directly anytime from a button etc.
 - **TTS Message Timeout** - Adjust this for the longest TTS message you may play or your messages may be cut short.  Default is 60 seconds.
 
 ### Create or Adjust your TTS Service Calls
@@ -72,14 +72,16 @@ Then call with `skip_none` set to `false` if you want the no saved messages mess
         message: "This is my message!"
         skip_none: false
 
+### Clearing Saved Messages
+Saved messages can be cleared without playing by calling the **Clear Saved Messages** `script.clear_saved_messages` script.  This can be used if you want to just display saved messages on the front end instead of playing them back via TTS (see markdown card example).
+
 ## Lovelace Examples
-Using variable.saved messages in an entity card will show you the number of saved messages as the state.  The messages are available in the more-info attributes drop down.
+Using `variable.saved_messages` in an entity card will display the number of saved messages as the state.  The messages are available in the more-info dialogue.
 
 ![Entity](screenshots/saved_msg_entity.PNG "Saved Messages Entity")
 
 ![More-Info](screenshots/saved_msg_more_info.PNG "Saved Messages More-Info")
 
-See [saved_messages_markdown_card.yaml](saved_messages_markdown_card.yaml) for a sample markdown card for lovelace to display saved messages on the front end.  Messages are also
-available in the attributes section of the variable.saved_messages entity more-info dialogue.
+See [saved_messages_markdown_card.yaml](saved_messages_markdown_card.yaml) for a sample markdown card for lovelace to display saved messages on the front end.
 
 ![Markdown Card](screenshots/saved_msg_markdown.PNG "Saved Messages Markdown Card")
