@@ -1,0 +1,17 @@
+###############################################################################
+## Saved Messages Markdown Card
+###############################################################################
+- type: markdown
+  title: Saved Messages
+  content: |
+    {%- if states('variable.saved_messages')|int(0) > 0 %}
+    {%- set msgnum = namespace(value=0) %}
+    {%- for key,value in states.variable.saved_messages.attributes.items() %}
+    {%- if loop.index % 2 == 1 %}
+    {%- set msgnum.value = msgnum.value + 1 %}
+    - **{{ value }}**
+    <sup>{{ as_datetime(state_attr('variable.saved_messages','msg_time' ~ msgnum.value)).strftime('%A, %B %-d @ %-I:%M %p') }}</sup>
+    {% endif %}
+    {% endfor %}
+    {% else %} No messages.
+    {% endif %}
