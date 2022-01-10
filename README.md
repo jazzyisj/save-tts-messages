@@ -9,11 +9,9 @@ Saved messages will survive restarts.
 
 **BONUS - OPTIONAL TTS MESSAGE HISTORY**
 
-This default components in this package will also record messages to a TTS history file to  `/config/www/tts_message_history.txt` using the built in [file integration](https://www.home-assistant.io/integrations/file/).
+This default components in this package will also record messages to the file `/config/www/tts_message_history.txt` using the built in [file integration](https://www.home-assistant.io/integrations/file/).
 
-**You must manually create a blank file `/config/www/tts_message_history.txt` and restart Home Assistant after installing this package for tts message history to function.**  The tts_message_history.txt file can also be *cleared* at any time, **but not deleted**.
-
-Note that it takes a moment for the last message to be recorded in the history file.
+**You must manually create a blank file `/config/www/tts_message_history.txt` and restart Home Assistant after installing this package for tts message history to function.**  The tts_message_history.txt file can also be *cleared* at any time, **but not deleted**. Note that it takes a moment for the last message to be recorded in the history file.
 
 If you don't want to use message history just delete the indicated sections of code.
 
@@ -29,7 +27,7 @@ To enable packages in your configuation, create a folder in your config director
 If you already have packages enabled in your configuration, simply download [package_save_tts_messages.yaml](package_save_tts_messages.yaml) to your packages directory.  Don't forget to restart Home Assistant!
 
 ### Install Without Pacakges
-To utilize this without installing as a package copy the relevant code and paste in an appropriate place in your `configuration.yaml` file.  Everything but the automation is required for Play and Save TTS Messages to function.
+To utilize this without installing as a package copy the relevant code and paste in an appropriate place in your `configuration.yaml` file.  Everything except the **Play Saved Messages** automation and indicated TTS History components are required for Play and Save TTS Messages to function.
 
 ### Install HASS-Variables Custom Integration
 The [HASS-Variables](https://github.com/Wibias/hass-variables) integration is available on HACS. If you're not using HACS I'll assume you know how to install it manually.
@@ -38,9 +36,9 @@ The [HASS-Variables](https://github.com/Wibias/hass-variables) integration is av
 You must change a couple of things in the package to work with your configuration.  **Look for the #TODO tags!**
 
 - **TTS Servce** - The package default is `tts.cloud_say` which is the NabuCasa TTS service.  Change these calls to whichever TTS service you use (TTS, Alexa Notify).
-- **Media Player** - You must change these media player entity_ids to a valid media player entity id in your configuration.
+- **Media Player** - You must change these to a valid media player entity id in your configuration.
 - **Play or Save Condition** - Adjust this condition to decide whether to play or save the TTS message.  The TTS message will play immediately and will not be saved when the condition(s) evaluate to true.
-- **Play Saved Messages Trigger** - Adjust this trigger to automatically call **Play Saved TTS Messages**.  You can, of course, call the script directly anytime from a button etc.
+- **Play Saved Messages Trigger** - Adjust this trigger to automatically call **Play Saved TTS Messages**.  You can, of course, call this script directly anytime from a tap action etc.
 - **TTS Message Timeout** - Adjust this for the longest TTS message you may play or your messages may be cut short.  Default is 60 seconds.
 
 ### Create or Adjust your TTS Service Calls
