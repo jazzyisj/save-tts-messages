@@ -23,7 +23,7 @@ sensor: #TODO delete this sensor if you don't want to use message history
     name: 'Last TTS Message'
     file_path: /config/www/tts_message_history.txt
 
-notify: #TODO delete this notify platorm if you don't want to use message history
+notify: #TODO delete this notify platform if you don't want to use message history
   - platform: file
     name: 'TTS Message History'
     filename: /config/www/tts_message_history.txt
@@ -56,7 +56,7 @@ script:
   # Play/Save TTS Message
   ###############################################################################
   play_or_save_message:
-    alias: 'Play or Save Messsage'
+    alias: 'Play or Save Message'
     description: 'Play TTS message if someone is home or save it if not.'
     mode: queued
     fields:
@@ -114,7 +114,7 @@ script:
           variable: saved_messages
           value: '{{ count if repeat_message else count + 1 }}'
           attributes: >
-            {% set message = message|replace('\n',' ') %} {# newlines mess with dictonary format #}
+            {% set message = message|replace('\n',' ') %} {# newlines mess with dictionary format #}
             {% set msg_num = namespace(value=0) %}
             {% set found_msg = namespace(value=0) %}
             {% set dict_string = namespace(value='') %}

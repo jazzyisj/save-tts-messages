@@ -15,7 +15,7 @@ entities:
         tap_action:
           action: call-service
           service: script.play_saved_messages
-          serivce_data:
+          service_data:
             skip_none: false
 
       - entity: script.play_last_message

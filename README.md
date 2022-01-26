@@ -1,7 +1,7 @@
 # Play and Save TTS Messages + Message History
 
 ## What is this?
-This is more or less an answering machine (remember those?) for your TTS messages.  When you play a TTS message that you want saved under certain condtions (ie. nobody is home), you will call the script **Play or Save TTS Messsage** `script.play_or_save_message` instead of calling your tts service (or Alexa notify) directly.  The script will decide whether to play the message immediately, or save it based on the conditions you specify.  If a saved tts message is repeated another message is not saved, only the timestamp is updated to the most recent instance.
+This is more or less an answering machine (remember those?) for your TTS messages.  When you play a TTS message that you want saved under certain conditions (ie. nobody is home), you will call the script **Play or Save TTS Message** `script.play_or_save_message` instead of calling your tts service (or Alexa notify) directly.  The script will decide whether to play the message immediately, or save it based on the conditions you specify.  If a saved tts message is repeated another message is not saved, only the timestamp is updated to the most recent instance.
 
 Messages are played back using the **Play Saved TTS Messages** script `script.play_saved_tts_messages`.  Set an appropriate trigger (for example when you arrive home) in the automation  **Play Saved Messages** `automation.play_saved_messages` automation to call this script automatically.
 
@@ -19,14 +19,14 @@ If you don't want to use message history just delete the indicated sections of c
 ### Install This Package
 The easiest way to utilize this is to install it as a [package](https://www.home-assistant.io/docs/configuration/packages/).
 
-To enable packages in your configuation, create a folder in your config directory named `packages` and add the following line to your `configuration.yaml` file.
+To enable packages in your configuration, create a folder in your config directory named `packages` and add the following line to your `configuration.yaml` file.
 
     homeassistant:
       packages: /config/packages
 
 If you already have packages enabled in your configuration, simply download [package_save_tts_messages.yaml](package_save_tts_messages.yaml) to your packages directory.  Don't forget to restart Home Assistant!
 
-### Install Without Pacakges
+### Install Without Packages
 To utilize this without installing as a package copy the relevant code and paste in an appropriate place in your `configuration.yaml` file.  Everything except the **Play Saved Messages** automation and indicated TTS History components are required for Play and Save TTS Messages to function.
 
 ### Install HASS-Variables Custom Integration
@@ -35,14 +35,14 @@ The [HASS-Variables](https://github.com/Wibias/hass-variables) integration is av
 ### Adjust Package For Your Configuration
 You must change a couple of things in the package to work with your configuration.  **Look for the #TODO tags!**
 
-- **TTS Servce** - The package default is `tts.cloud_say` which is the NabuCasa TTS service.  Change these calls to whichever TTS service you use (TTS, Alexa Notify).
+- **TTS Service** - The package default is `tts.cloud_say` which is the NabuCasa TTS service.  Change these calls to whichever TTS service you use (TTS, Alexa Notify).
 - **Media Player** - You must change these to a valid media player entity id in your configuration.
 - **Play or Save Condition** - Adjust this condition to decide whether to play or save the TTS message.  The TTS message will play immediately and will not be saved when the condition(s) evaluate to true.
 - **Play Saved Messages Trigger** - Adjust this trigger to automatically call **Play Saved TTS Messages**.  You can, of course, call this script directly anytime from a tap action etc.
 - **TTS Message Timeout** - Adjust this for the longest TTS message you may play or your messages may be cut short.  Default is 60 seconds.
 
 ### Create or Adjust your TTS Service Calls
-Finally, you must create the **Play or Save TTS Messsage** service calls.  Replace any current direct TTS service calls for messages you want to save or create new ones.
+Finally, you must create the **Play or Save TTS Message** service calls.  Replace any current direct TTS service calls for messages you want to save or create new ones.
 
 **BASIC TTS EXAMPLE**
 
@@ -91,7 +91,7 @@ The `skip_save: true` parameter can be used if you want to record a messages in 
         message: ...
 
 ### Skip No Messages Notification
-The default configuration will play *"There are no messages waiting for you."* if there are no saved messages when  **Play Saved TTS Messages** is called.  If you wish to skip this message you can specify the `skip_none` parameter in a  **Play or Save TTS Messsage** service call.
+The default configuration will play *"There are no messages waiting for you."* if there are no saved messages when  **Play Saved TTS Messages** is called.  If you wish to skip this message you can specify the `skip_none` parameter in a  **Play or Save TTS Message** service call.
 
     - service: script.play_or_save_message
       data:
@@ -109,7 +109,7 @@ to
     skip_none: '{{ skip_none|default(false) }}'
 
 
-Then call with `skip_none` set to `false` if you want the no saved messages messaage to play.
+Then call with `skip_none` set to `false` if you want the no saved messages message to play.
 
     - service: script.play_or_save_message
       data:
