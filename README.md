@@ -25,14 +25,14 @@ The [HASS-Variables](https://github.com/Wibias/hass-variables) integration is av
 ### 2. Create a TTS Saved Messages sensor.
 
 Add a Hass-Variables integration sensor variable to your Home Assistant instance with the following option values.
-    Type: Create a Sensor Variable
-    Variable ID: saved_tts_messages
-    Variable Name: Saved TTS Messages
-    Icon: mdi:account-voice
-    Initial Attributes: <leave blank>
-    Intial Value: 0
-    Restore on Restart: ON
-    Force Update: ON
+        Type: Create a Sensor Variable
+        Variable ID: saved_tts_messages
+        Variable Name: Saved TTS Messages
+        Icon: mdi:account-voice
+        Initial Attributes: <leave blank>
+        Intial Value: 0
+        Restore on Restart: ON
+        Force Update: ON
 
 ### 3. Install This Package
 
