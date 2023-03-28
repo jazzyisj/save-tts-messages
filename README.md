@@ -140,7 +140,7 @@ If you see this error you forgot to create `/config/www/tts_message_history.txt`
 
 ![File Missing Error](screenshots/file_missing_error.PNG "File Missing Error")
 
-# Invalid config for [sensor.file]: not a file for dictionary value @ data['file_path']. Got '/config/www/tts_message_historyx.txt'. (See ?, line ?).
+**Invalid config for [sensor.file]: not a file for dictionary value @ data['file_path']. Got '/config/www/tts_message_historyx.txt'. (See ?, line ?)**.
 
 NOTE - You will see this warning in your Home Assistant Log until the first TTS message is recorded in the history file.
 
