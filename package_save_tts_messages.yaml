@@ -1,138 +1,106 @@
 ###############################################################################
-## Package - Play and Save TTS Messages + Message History
-# NOTE: Requires hass-variables custom integration
-# https://github.com/Wibias/hass-variables
-
-# OPTIONAL BONUS: TTS Message History / Play Last Message
-# Records all TTS message to tts_history.csv and will replay last message
-# Simply delete tagged code if you don't want to use message history
+# PACKAGE - Save and Play TTS Messages + Message History
+# DESCRIPTION: Save tts messages to play later, save messages history, replay the last message.
+# REQUIREMENTS: Hass-Variables Integration v3.0.0+  https://github.com/Wibias/hass-variables
+# INSTALLATION: https://github.com/jazzyisj/save-tts-messages#readme
 ###############################################################################
 
-#TODO - change all items marked with this tag
-
-variable:
-  saved_messages:
-    value: 0
-    attributes:
-      friendly_name: 'Saved Messages'
-      icon: mdi:account-voice
-    restore: true
-
-sensor: #TODO delete this sensor if you don't want to use message history
+#OPTIONAL delete if tts history / play last message not required
+sensor:
   - platform: file
-    name: 'Last TTS Message'
+    name: "TTS Last Message"
     file_path: /config/www/tts_message_history.txt
 
-notify: #TODO delete this notify platform if you don't want to use message history
+#OPTIONAL delete if tts history / play last message not required
+notify:
   - platform: file
-    name: 'TTS Message History'
+    name: "TTS Message History"
     filename: /config/www/tts_message_history.txt
-    value_template: '{{ value_json }}'
-
-automation:
-  ###############################################################################
-  ## TTS - Play Saved Messages
-  ###############################################################################
-  - id: play_saved_messages
-    alias: 'Play Saved Messages'
-    description: 'Play saved TTS messages when person has been home 5 minutes.'
-    trigger:
-      - platform: state #TODO example trigger - adjust for your needs
-        entity_id: person.jason
-        to: home
-        for:
-          minutes: 5
-    condition:
-      - condition: numeric_state
-        entity_id: variable.saved_messages
-        above: 0
-    action:
-      - service: script.play_saved_messages
-        data:
-          skip_none: false #TODO delete this to skip no message notifications
+    value_template: "{{ value_json }}"
 
 script:
+  #REQUIRED
   ###############################################################################
-  # Play/Save TTS Message
+  # TTS Play Message
   ###############################################################################
-  play_or_save_message:
-    alias: 'Play or Save Message'
-    description: 'Play TTS message if someone is home or save it if not.'
+  tts_play_message:
+    alias: "TTS Play Message"
+    description: "Play or save TTS message."
     mode: queued
     fields:
       message:
-        description: 'Message to play or save.'
-        example: 'This is my message!'
-      skip_save:
-        description: 'Skip saving the message.'
-        example: 'true'
+        description: "Message to play or save."
+        example: "This is my message!"
+      save_msg:
+        description: "Save TTS message if required."
+        example: "true"
     variables:
-      skip_save: "{{ skip_save|default(false) }}"
+      save_msg: "{{ save_msg|default(true) }}"
     sequence:
-      - choose:
-          - conditions:
-              - condition: template #NOTE - do not remove this condition
-                alias: 'Message save not skipped.'
-                value_template: '{{ not skip_save }}'
-
-              - condition: state #TODO example condition - adjust for your needs
-                entity_id: person.jason
-                state: home
-            sequence:
-              - service: tts.cloud_say #TODO - you must change to your tts service
-                target:
-                  entity_id: media_player.dining_room_hub #TODO change to your own media player entity
-                data:
-                  message: '{{ message }}'
-        default:
-          - service: script.save_message
-            data:
-              message: '{{ message }}'
-
-      #TODO delete this service call if you don't want to use message history
-      - service: notify.tts_message_history
+      - service: notify.tts_message_history #OPTIONAL delete if tts history / play last message not required
         data:
           message: "{{ (now() ~ ' ' ~ message)[0:250]|replace('\n',' ') }}"
 
+      - if:
+          - condition: template
+            alias: "Save message parameter is true."
+            value_template: "{{ save_msg }}"
+
+          - condition: state #TODO change condition(s) for your needs
+            entity_id: binary_sensor.someone_home
+            state: "off"
+        then:
+          - service: script.tts_save_message
+            data:
+              message: "{{ message }}"
+        else:
+          - service: tts.cloud_say #TODO - change to your tts/notify service
+            target:
+              entity_id: media_player.kiosk_internal #TODO change to your own media player entity
+            data:
+              message: "{{ message }}"
+
+  #REQUIRED
   ###############################################################################
-  # Save TTS Message
+  # TTS Save Message
   ###############################################################################
-  save_message:
-    alias: 'Save Message'
-    description: 'Save TTS message.'
+  tts_save_message:
+    alias: "TTS Save Message"
+    description: "Save TTS message."
     mode: queued
     fields:
       message:
-        description: 'Message to be saved.'
-        example: 'This is a message!'
+        description: "Message to be saved."
+        example: "This is a message!"
     variables:
-      count: "{{ states('variable.saved_messages')|int(0) }}"
-      repeat_message: '{{ message in states.variable.saved_messages.attributes.values() }}'
+      count: "{{ states('sensor.tts_saved_messages')|int(0) }}"
+      repeat_message: "{{ message in states.sensor.tts_saved_messages.attributes.values() }}"
     sequence:
-      - service: variable.set_variable
+      - service: variable.update_sensor
+        target:
+          entity_id: sensor.tts_saved_messages
         data:
-          variable: saved_messages
-          value: '{{ count if repeat_message else count + 1 }}'
+          value: "{{ count if repeat_message else count + 1 }}"
           attributes: >
             {% set message = message|replace('\n',' ') %} {# newlines mess with dictionary format #}
             {% set msg_num = namespace(value=0) %}
             {% set found_msg = namespace(value=0) %}
             {% set dict_string = namespace(value='') %}
-
             {% if count > 0 %}
-              {% for key, value in states.variable.saved_messages.attributes.items() %}
-                  {% if loop.index % 2 == 1 %} {# even number attribute is msg, odd is timestamp #}
+              {% for key, value in states.sensor.tts_saved_messages.attributes.items()
+                  if key not in ['icon','friendly_name'] %}
+                {% if loop.index % 2 == 1 %} {# even number attribute is msg, odd is msg_time #}
                   {% set msg_num.value = msg_num.value + 1 %}
                   {% if message == value %}
                     {# message is a repeat - record index #}
                     {% set found_msg.value = msg_num.value %}
                   {% else %}
-                    {# add to message dict string, 2 attributes - msg, timestamp #}
+                    {# add to message dict string, 2 attributes - msg, msg_time #}
                     {% set dict_string.value = dict_string.value
                         ~ '"msg' ~ msg_num.value ~ '":"'
-                        ~ states.variable.saved_messages.attributes['msg' ~ msg_num.value] ~ '"' ~ ','
+                        ~ states.sensor.tts_saved_messages.attributes['msg' ~ msg_num.value] ~ '"' ~ ','
                         ~ '"msg_time' ~ msg_num.value ~ '":"'
-                        ~ states.variable.saved_messages.attributes['msg_time' ~ msg_num.value] ~ '"' ~ ',' %}
+                        ~ states.sensor.tts_saved_messages.attributes['msg_time' ~ msg_num.value] ~ '"' ~ ',' %}
                   {% endif %}
                 {% endif %}
               {% endfor %}
@@ -146,109 +114,107 @@ script:
             {% endif %}
             {# complete dictionary format -#}
             {{- '{ ' ~ dict_string.value ~ ' }' -}}
-          replace_attributes: '{{ not repeat_message }}'
+          replace_attributes: "{{ not repeat_message }}"
 
+  #REQUIRED
   ###############################################################################
-  # Play Saved TTS Messages
+  # TTS Play Saved Messages
   ###############################################################################
-  play_saved_messages:
-    alias: 'Play Saved Messages'
-    description: 'Play saved TTS messages.'
-    icon: mdi:play-circle
+  tts_play_saved_messages:
+    alias: "TTS Play Saved Messages"
+    description: "Play and delete saved TTS messages."
+    icon: mdi:play-box-multiple
     fields:
       skip_none:
-        description: 'Skip no saved messages announcement.'
-        example: 'true'
+        description: "Skip the no saved messages announcement."
+        example: "true"
     variables:
-      skip_none: '{{ skip_none|default(false) }}'
-      msgs: "{{ states('variable.saved_messages')|int(0) }}"
+      skip_none: "{{ skip_none|default(false) }}"
+      msgs: "{{ states('sensor.tts_saved_messages')|int(0) }}"
     sequence:
       - condition: template
-        alias: 'Message count > 0 if skip_none is true'
-        value_template: '{{ msgs > 0 if skip_none else true }}'
+        alias: "Message count > 0 if skip_none is true"
+        value_template: "{{ msgs > 0 if skip_none else true }}"
 
-      - service: tts.cloud_say #TODO - you must change to your tts service
+      - service: tts.cloud_say #TODO - change to your tts service
         target:
-          entity_id: media_player.dining_room_hub #TODO change to your own media player entity
+          entity_id: media_player.kiosk_internal #TODO change to your tts media player entity
         data:
           message: >
             There {{ 'are no messages' if msgs == 0 else ('is 1 message'
               if msgs == 1 else 'are ' ~ msgs ~ ' messages') }} waiting for you.
 
-      - wait_for_trigger:
-          - platform: state
-            entity_id: media_player.dining_room_hub #TODO change to your own media player entity
-            to: 'playing'
-        timeout: 15
+      - delay: 1
 
-      - wait_template: "{{ not is_state('media_player.dining_room_hub','playing') }}" #TODO change to your own media player entity
+      - wait_template: "{{ is_state('media_player.kiosk_internal','playing') }}" #TODO change to your tts media player entity
         timeout: 60
 
-      - delay: 1 # delay before first saved message
+      - wait_template: "{{ not is_state('media_player.kiosk_internal','playing') }}" #TODO change to your tts media player entity
+        timeout: 60
 
       - choose:
-          - conditions: '{{ msgs > 0 }}'
+          - conditions: "{{ msgs > 0 }}"
             sequence:
               - repeat:
-                  count: '{{ msgs }}'
+                  count: "{{ msgs }}"
                   sequence:
-                    - service: tts.cloud_say #TODO - you must change to your tts service
+                    - service: tts.cloud_say #TODO - change to your tts service
                       target:
-                        entity_id: media_player.dining_room_hub #TODO change to your own media player entity
+                        entity_id: media_player.kiosk_internal #TODO change to your tts media player entity
                       data:
                         message: >
-                          {% set date = state_attr('variable.saved_messages','msg_time' ~ repeat.index)|as_datetime %}
-                          {{ state_attr('variable.saved_messages','msg' ~ repeat.index) }}
+                          {% set date = state_attr('sensor.tts_saved_messages','msg_time' ~ repeat.index)|as_datetime %}
+                          {{ state_attr('sensor.tts_saved_messages','msg' ~ repeat.index) }}
                           {% if now().day == date.day %} Today at {{ date.strftime('%-I:%M %p') }}
                           {% elif now().day - date.day == 1 %} Yesterday at {{ date.strftime('%-I:%M %p') }}
                           {% elif now().day - date.day > 6%} {{ date.strftime('%A, %B %-d at %-I:%M %p') }}
                           {% else %} {{ date.strftime('%A at %-I:%M %p') }}
                           {% endif %}
 
-                    - wait_for_trigger:
-                        - platform: state
-                          entity_id: media_player.dining_room_hub #TODO change to your own media player entity
-                          to: 'playing'
+                    - wait_template: "{{ is_state('media_player.kiosk_internal','playing') }}" #TODO change to your tts media player entity
                       timeout: 15
 
-                    - wait_template: "{{ not is_state('media_player.dining_room_hub','playing') }}" #TODO change to your own media player entity
-                      timeout: 60 #TODO change this to desired longest possible tts message
+                    - wait_template: "{{ not is_state('media_player.kiosk_internal','playing') }}" #TODO change to your tts media player entity
+                      timeout: 60 #TODO change this to your longest possible tts message
 
                     - delay: 1 # delay between messages
 
-      - service: script.clear_saved_messages
+      - service: script.tts_clear_saved_messages
 
+  #REQUIRED
   ###############################################################################
-  # Clear Saved TTS Messages
+  # TTS Clear Saved Messages
   ###############################################################################
-  clear_saved_messages:
-    alias: 'Clear Saved Messages'
-    description: 'Clear saved TTS messages.'
+  tts_clear_saved_messages:
+    alias: "TTS Clear Saved Messages"
+    description: "Clear saved TTS messages."
     icon: mdi:delete-forever
     sequence:
-      - service: variable.set_variable
+      - service: variable.update_sensor
+        target:
+          entity_id: sensor.tts_saved_messages
         data:
-          variable: saved_messages
-          value: '0'
+          value: 0
           replace_attributes: true
 
+  #OPTIONAL delete if tts history / play last message not required
   ###############################################################################
-  # Play Last TTS Messages
+  # TTS Play Last Message
   ###############################################################################
-  play_last_message:  #TODO delete this script if you don't want to use message history
-    alias: 'Play Last Message'
-    description: 'Play last TTS messages.'
-    icon: mdi:reply-circle
+  tts_play_last_message:
+    alias: "TTS Play Last Message"
+    description: "Play last TTS message."
+    icon: mdi:comment-arrow-left-outline
     sequence:
-      - service: tts.cloud_say #TODO - you must change to your tts service
+      - service: tts.cloud_say #TODO - change to your tts service
         target:
-          entity_id: media_player.dining_room_hub #TODO change to your own media player entity
+          entity_id: media_player.kiosk_internal #TODO change to your media player entity_id
         data:
           message: |
-            {% set message = states('sensor.last_tts_message')[33:255] %}
+            {% set message = states('sensor.tts_last_message')[33:255] %}
             {% if message == '' %} There are no messages in the history.
             {% else %}
-              {% set time = as_datetime(states('sensor.last_tts_message')[0:32]) %}
+              {% set time = as_datetime(states('sensor.tts_last_message')[0:32]) %}
               {% if now().day == time.day %} {% set time_msg = 'Today at ' ~ time.strftime('%-I:%M %p') %}
               {% elif now().day - time.day == 1 %} {% set time_msg = 'Yesterday at ' ~ time.strftime('%-I:%M %p') %}
               {% elif now().day - time.day > 6%} {% set time_msg = time.strftime('%A, %B %-d at %-I:%M %p') %}
@@ -257,3 +223,48 @@ script:
               {{ message }}
               {{ time_msg }}.
             {% endif %}
+
+#OPTIONAL - example automation, delete if not required
+automation:
+  ###############################################################################
+  # TTS Auto Play Saved Messages
+  ###############################################################################
+  - id: tts_auto_play_saved_messages
+    alias: "TTS Auto Play Saved Messages"
+    description: "Automatically play saved TTS messages."
+    max_exceeded: silent
+    trigger:
+      #OPTIONAL example triggers - delete or adjust for your needs
+      - platform: state
+        entity_id: binary_sensor.someone_home
+        to: "on"
+        for:
+          minutes: 5
+        not_from:
+          - unknown
+          - unavailable
+
+      - platform: state
+        entity_id:
+          - input_boolean.alarm_triggered
+          - switch.system_mute
+          - binary_sensor.scene_active
+        to: "off"
+        not_from:
+          - unknown
+          - unavailable
+        for:
+          minutes: 1
+    condition:
+      - condition: numeric_state
+        entity_id: sensor.tts_saved_messages
+        above: 0
+
+      #OPTIONAL example conditions - delete or adjust for your needs
+      - condition: state
+        entity_id: binary_sensor.someone_home
+        state: "on"
+    action:
+      - service: script.tts_play_saved_messages
+        data:
+          skip_none: true #OPTIONAL change to false to play no messages notifications.
