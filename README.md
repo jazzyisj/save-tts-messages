@@ -130,15 +130,15 @@ Saved messages can be cleared without playing them by calling the **TTS Clear Sa
 
 See [saved_messages_card.yaml](saved_messages_card.yaml) for an example lovelace card.
 
-![Bo Saved Messages](screenshots/no_saved_messages_card.PNG "Saved Messages Card")
+![No Saved Messages](screenshots/no_saved_messages_card.png "Saved Messages Card")
 
-![Saved Messages](screenshots/saved_messages_card.PNG "Saved Messages Card")
+![Saved Messages](screenshots/saved_messages_card.png "Saved Messages Card")
 
 ## Troubleshooting
 
 If you see this error you forgot to create `/config/www/tts_message_history.txt`
 
-![File Missing Error](screenshots/file_missing_error.PNG "File Missing Error")
+![File Missing Error](screenshots/file_missing_error.png "File Missing Error")
 
 NOTE - You will see the following warning in your Home Assistant Log until the first TTS message is recorded in the history file.
 
