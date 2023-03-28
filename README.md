@@ -138,7 +138,7 @@ See [saved_messages_card.yaml](saved_messages_card.yaml) for an example lovelace
 
 If you see this error you forgot to create `/config/www/tts_message_history.txt`
 
-![File Missing Error](screenshots/file_missing_error.png "File Missing Error")
+![File Missing Error](screenshots/file_missing.png "File Missing Error")
 
 NOTE - You will see the following warning in your Home Assistant Log until the first TTS message is recorded in the history file.
 
